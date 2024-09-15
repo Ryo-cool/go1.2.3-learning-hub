@@ -1,3 +1,5 @@
 module github.com/onoderaryou/go1.23-features
 
 go 1.23
+
+require golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // indirect
