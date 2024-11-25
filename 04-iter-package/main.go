@@ -2,27 +2,50 @@ package main
 
 import (
 	"fmt"
-
-	"golang.org/x/exp/iter"
+	"iter"
 )
 
+// スライスを2倍にするイテレータ
+func double[T ~int | ~float64](s []T) iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for _, x := range s {
+			if !yield(x * 2) {
+				return
+			}
+		}
+	}
+}
+
+// 偶数のみをフィルタリングするイテレータ
+func evens[T ~int](s []T) iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for _, x := range s {
+			if x%2 == 0 {
+				if !yield(x) {
+					return
+				}
+			}
+		}
+	}
+}
+
 func main() {
-	fmt.Println("iter package example:")
+	fmt.Println("Go 1.23 iter パッケージの例:")
 
 	numbers := []int{1, 2, 3, 4, 5}
+	fmt.Printf("Original: %v\n", numbers)
 
 	// スライスの要素を2倍にする
-	doubled := iter.Map(numbers, func(x int) int {
-		return x * 2
-	})
-
-	fmt.Printf("Original: %v\n", numbers)
-	fmt.Printf("Doubled: %v\n", doubled)
+	fmt.Print("Doubled: ")
+	for v := range double(numbers) {
+		fmt.Printf("%d ", v)
+	}
+	fmt.Println()
 
 	// 偶数のみをフィルタリング
-	evens := iter.Filter(numbers, func(x int) bool {
-		return x%2 == 0
-	})
-
-	fmt.Printf("Evens: %v\n", evens)
+	fmt.Print("Evens: ")
+	for v := range evens(numbers) {
+		fmt.Printf("%d ", v)
+	}
+	fmt.Println()
 }

@@ -2,32 +2,34 @@ package main
 
 import (
 	"fmt"
-
-	"golang.org/x/exp/structs"
+	"reflect"
+	"structs"
 )
 
 type Person struct {
 	Name string
 	Age  int
+	_    structs.HostLayout
 }
 
 func main() {
-	fmt.Println("structs package example:")
+	fmt.Println("Go 1.23 構造体の例:")
 
 	p := Person{Name: "Alice", Age: 30}
+	v := reflect.ValueOf(p)
 
-	// 構造体のフィールドを列挙
-	fields := structs.Fields(p)
-	fmt.Println("Fields:")
-	for _, field := range fields {
-		fmt.Printf("  %s: %v\n", field.Name(), field.Value())
+	fmt.Println("\nフィールドの列挙（新しいSeqメソッドを使用）:")
+	for v := range v.Seq() {
+		field := v.Interface()
+		fmt.Printf("  %v\n", field)
 	}
 
-	// 構造体をマップに変換
-	m := structs.Map(p)
-	fmt.Println("Map:", m)
-
-	// 構造体のフィールド名を取得
-	names := structs.Names(p)
-	fmt.Println("Field names:", names)
+	m := make(map[string]interface{})
+	t := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		if t.Field(i).Name != "_" {
+			m[t.Field(i).Name] = v.Field(i).Interface()
+		}
+	}
+	fmt.Println("\nMap:", m)
 }
